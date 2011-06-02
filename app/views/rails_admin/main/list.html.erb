@@ -44,6 +44,12 @@
                  <%= link_to(t("admin.list.add_new"), rails_admin_new_path(:model_name => @abstract_model.to_param), :class => "ra-button") %>
                 </li>
               <% end %>
+              <% if authorized?(:import, @abstract_model)  && @model_config.tags[:import]%>
+                <li>
+                 <%= link_to(t("admin.list.import"),@model_config.tags[:import] , :class => "ra-button") %>
+                </li>
+              <% end %>
+
             </ul>
             <%= form_tag(rails_admin_list_path(params.merge(:model_name => @abstract_model.to_param).reject{|key, value| key.to_sym == :page}), :method => "get", :remote => true) do %>
               <fieldset>
