@@ -41,31 +41,20 @@ migrate_database
 # Load support files
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each{|f| require f}
 
-Webrat.configure do |config|
-  config.mode = :rails
-end
-
 RSpec.configure do |config|
-  # Remove this line if you don't want RSpec's should and should_not
-  # methods or matchers
   require 'rspec/expectations'
 
   config.include RSpec::Matchers
-  config.include Webrat::Matchers
-  config.include Webrat::HaveTagMatcher
   config.include DatabaseHelpers
   config.include GeneratorHelpers
-
-  # == Mock Framework
-  config.mock_with :rr
 
   config.include Warden::Test::Helpers
 
   config.before(:each) do
+    RailsAdmin.setup
     RailsAdmin::Config.excluded_models = [RelTest, FieldTest]
-    RailsAdmin::AbstractModel.instance_variable_get("@models").clear
-    RailsAdmin::Config.reset
-
+    RailsAdmin::AbstractModel.all_models = nil
+    RailsAdmin::AbstractModel.all_abstract_models = nil
     RailsAdmin::AbstractModel.new("Division").destroy_all!
     RailsAdmin::AbstractModel.new("Draft").destroy_all!
     RailsAdmin::AbstractModel.new("Fan").destroy_all!
@@ -73,6 +62,7 @@ RSpec.configure do |config|
     RailsAdmin::AbstractModel.new("Player").destroy_all!
     RailsAdmin::AbstractModel.new("Team").destroy_all!
     RailsAdmin::AbstractModel.new("User").destroy_all!
+    RailsAdmin::History.destroy_all
 
     user = RailsAdmin::AbstractModel.new("User").create(
       :email => "username@example.com",
@@ -83,6 +73,7 @@ RSpec.configure do |config|
   end
 
   config.after(:each) do
+    RailsAdmin.test_reset!
     Warden.test_reset!
   end
 end

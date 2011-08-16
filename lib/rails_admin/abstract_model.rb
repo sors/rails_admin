@@ -3,12 +3,20 @@ require 'rails_admin/generic_support'
 
 module RailsAdmin
   class AbstractModel
-
-    @models = []
-
+    cattr_accessor :all_models, :all_abstract_models
+    @@all_models = nil
+    @@all_abstract_models = nil
     # Returns all models for a given Rails app
+    
+    
+    # self.all_abstract_models
     def self.all
-      if @models.empty?
+      @@all_abstract_models ||= all_models.map{ |model| new(model) }
+    end
+    
+    def self.all_models
+      unless @@all_models
+        @@all_models = []
         if RailsAdmin::Config.included_models.any?
           # Whitelist approach, use only models explicitly listed
           possible_models = RailsAdmin::Config.included_models.map(&:to_s)
@@ -25,27 +33,24 @@ module RailsAdmin
         excluded_models = RailsAdmin::Config.excluded_models.map(&:to_s)
         excluded_models << ['History']
 
-        #Rails.logger.info "possible_models: #{possible_models.inspect}"
         add_models(possible_models, excluded_models)
 
-        #Rails.logger.info "final models: #{@models.map(&:model).inspect}"
-        @models.sort!{|x, y| x.model.to_s <=> y.model.to_s}
+        @@all_models.sort!{|x, y| x.to_s <=> y.to_s}
       end
 
-      @models
+      @@all_models
     end
 
     def self.add_models(possible_models=[], excluded_models=[])
       possible_models.each do |possible_model_name|
         next if excluded_models.include?(possible_model_name)
-        #Rails.logger.info "possible_model_name: #{possible_model_name.inspect}"
         add_model(possible_model_name)
       end
     end
 
     def self.add_model(model_name)
       model = lookup(model_name,false)
-      @models << new(model) if model
+      @@all_models << model if model
     end
 
     # Given a string +model_name+, finds the corresponding model class
@@ -53,16 +58,13 @@ module RailsAdmin
       begin
         model = model_name.constantize
       rescue NameError
-        #Rails.logger.info "#{model_name} wasn't a model"
         raise "RailsAdmin could not find model #{model_name}" if raise_error
         return nil
       end
 
       if model.is_a?(Class) && superclasses(model).include?(ActiveRecord::Base)
-        #Rails.logger.info "#{model_name} is a model"
         model
       else
-        #Rails.logger.info "#{model_name} is NOT a model"
         nil
       end
     end
@@ -79,7 +81,7 @@ module RailsAdmin
     def model
       @model_name.constantize
     end
-    
+
     private
 
     def self.superclasses(klass)

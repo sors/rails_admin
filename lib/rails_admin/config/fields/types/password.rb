@@ -11,7 +11,6 @@ module RailsAdmin
           RailsAdmin::Config::Fields::Types::register(self)
 
           @column_names = [:password]
-          @sortable = false
           @view_helper = :password_field
 
           def self.column_names
@@ -30,6 +29,10 @@ module RailsAdmin
           # Password field's value does not need to be read
           def value
             ""
+          end
+          
+          register_instance_option(:pretty_value) do
+            '*****'
           end
         end
       end

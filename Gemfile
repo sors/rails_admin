@@ -4,7 +4,7 @@ source 'http://rubygems.org'
 # put test-only gems in this group so their generators
 # and rake tasks are available in development mode:
 group :development, :test do
-  gem 'rails', '~> 3.0.7'
+  gem 'rails', '~> 3.0.0'
 
   platforms :jruby do
     gem 'jruby-openssl', '~> 0.7'
@@ -33,11 +33,16 @@ group :development, :test do
   end
 
   gem 'cancan' if ENV['AUTHORIZATION_ADAPTER'] == 'cancan'
-  gem 'factory_girl', '2.0.0.beta2'
-  gem 'generator_spec'
 
+  platform :rbx do
+    gem 'nokogiri', '1.4.7' # Nokogiri 1.5.0 is incompatible with Rubinius 1.2.3
+  end
+end
+
+group :debug do
   platform :mri_18 do
     gem 'ruby-debug'
+    gem 'linecache'
   end
 
   platform :mri_19 do
