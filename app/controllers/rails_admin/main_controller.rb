@@ -9,19 +9,34 @@ module RailsAdmin
     before_filter :get_object, :only => [:show, :edit, :update, :delete, :destroy]
     before_filter :get_attributes, :only => [:create, :update]
     before_filter :check_for_cancel, :only => [:create, :update, :destroy, :export, :bulk_destroy]
-
+    
+    before_filter :init_user_defined_controller
+    
+    def init_user_defined_controller
+      if (@model_config.controller_hook!=nil)
+        modul = @model_config.controller_hook
+      else 
+        begin
+          modul = "#{@abstract_model.model.name}ControllerHook".constantize
+        rescue NameError
+          logger.debug("to enable callback hooking to rails admin controller add #{@abstract_model.model.name}ControllerHook class to your controller library  ")
+        end
+      end
+      if (modul.class == Module && modul !=nil)
+        self.extend modul 
+      end
+    end
+    
     def index
       @authorization_adapter.authorize(:index) if @authorization_adapter
       @page_name = t("admin.dashboard.pagename")
       @page_type = "dashboard"
-
       @history = AbstractHistory.history_latest_summaries
       @month = DateTime.now.month
       @year = DateTime.now.year
       @history= AbstractHistory.history_for_month(@month, @year)
-
+      
       @abstract_models = RailsAdmin::Config.visible_models.map(&:abstract_model)
-
       @most_recent_changes = {}
       @count = {}
       @max = 0
@@ -35,6 +50,8 @@ module RailsAdmin
     end
 
     def list
+
+      
       @authorization_adapter.authorize(:list, @abstract_model) if @authorization_adapter
 
       @page_type = @abstract_model.pretty_name.downcase
@@ -111,9 +128,10 @@ module RailsAdmin
       @object.attributes = @attributes
       @page_name = t("admin.actions.create").capitalize + " " + @model_config.label.downcase
       @page_type = @abstract_model.pretty_name.downcase
-
+      before_create if methods.include?(:before_create)
       if @object.save
         AbstractHistory.create_history_item("Created #{@model_config.with(:object => @object).object_label}", @object, @abstract_model, _current_user)
+        after_create if methods.include?(:after_create)
         respond_to do |format|
           format.html do
             redirect_to_on_success
@@ -160,9 +178,10 @@ module RailsAdmin
       @model_config.update.fields.each {|f| f.parse_input(@attributes) if f.respond_to?(:parse_input) }
 
       @object.attributes = @attributes
-
+      before_update if methods.include?(:before_update)
       if @object.save
         AbstractHistory.create_update_history @abstract_model, @object, @cached_assocations_hash, associations_hash, @modified_assoc, @old_object, _current_user
+        after_update if methods.include?(:after_update)
         respond_to do |format|
           format.html do
             redirect_to_on_success
@@ -192,8 +211,9 @@ module RailsAdmin
 
     def destroy
       @authorization_adapter.authorize(:destroy, @abstract_model, @object) if @authorization_adapter
-
+      before_destroy if methods.include?(:before_destroy)
       if @object.destroy
+        after_destroy if methods.include?(:after_destroy)
         AbstractHistory.create_history_item("Destroyed #{@model_config.with(:object => @object).object_label}", @object, @abstract_model, _current_user)
         flash[:notice] = t("admin.flash.successful", :name => @model_config.label, :action => t("admin.actions.deleted"))
       else
@@ -562,3 +582,4 @@ module RailsAdmin
     end
   end
 end
+
