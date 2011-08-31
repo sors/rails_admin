@@ -15,7 +15,7 @@ module RailsAdmin
     # @see RailsAdmin::AbstractModel
     # @see RailsAdmin::Config::Model#abstract_model
     class Base
-      attr_reader :abstract_model, :bindings, :parent, :root, :tags
+      attr_reader :abstract_model, :bindings, :parent, :root, :tags,:controller_hook
 
       def initialize(parent)
         @abstract_model = parent.abstract_model
@@ -23,6 +23,7 @@ module RailsAdmin
         @parent = parent
         @root = parent.root
         @tags = {}
+        @controller_hook
       end
 
       def has_option?(name)

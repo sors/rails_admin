@@ -20,8 +20,6 @@ module RailsAdmin
           end
         end
         @bindings = {}
-        @tags = {}
-        @controller = nil
         @parent = nil
         @root = self
       end
