@@ -10,7 +10,7 @@ module RailsAdmin
     before_filter :get_attributes, :only => [:create, :update]
     before_filter :check_for_cancel, :only => [:create, :update, :destroy, :export, :bulk_destroy]
     
-    before_filter :init_user_defined_controller
+    before_filter :init_user_defined_controller, :only=>  [:create,:update,:destroy]
     
     def init_user_defined_controller
       if (@model_config.controller_hook!=nil)
