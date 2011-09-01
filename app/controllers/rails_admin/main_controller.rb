@@ -10,7 +10,7 @@ module RailsAdmin
     before_filter :get_attributes, :only => [:create, :update]
     before_filter :check_for_cancel, :only => [:create, :update, :destroy, :export, :bulk_destroy]
     
-    before_filter :init_user_defined_controller, :only=>  [:create,:update,:destroy]
+    before_filter :init_user_defined_controller, :only=>  [:create,:update,:destroy,:new]
     
     def init_user_defined_controller
       if (@model_config.controller_hook!=nil)
@@ -56,7 +56,7 @@ module RailsAdmin
 
       @page_type = @abstract_model.pretty_name.downcase
       @page_name = t("admin.list.select", :name => @model_config.label.downcase)
-
+      
       @objects, @current_page, @page_count, @record_count = list_entries
       @schema ||= { :only => @model_config.list.visible_fields.map {|f| f.name } }
 
@@ -98,6 +98,7 @@ module RailsAdmin
 
     def new
       @object = @abstract_model.new
+      before_new if methods.include?(:before_new)
       if @authorization_adapter
         @authorization_adapter.attributes_for(:new, @abstract_model).each do |name, value|
           @object.send("#{name}=", value)
@@ -107,6 +108,7 @@ module RailsAdmin
       if object_params = params[@abstract_model.to_param]
         @object.attributes = @object.attributes.merge(object_params)
       end
+      after_new if methods.include?(:after_new)
       @page_name = t("admin.actions.create").capitalize + " " + @model_config.label.downcase
       @page_type = @abstract_model.pretty_name.downcase
       respond_to do |format|
