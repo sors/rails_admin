@@ -98,6 +98,7 @@ module RailsAdmin
 
     def new
       @object = @abstract_model.new
+      assign_current_user_to_model
       before_new if methods.include?(:before_new)
       if @authorization_adapter
         @authorization_adapter.attributes_for(:new, @abstract_model).each do |name, value|
@@ -120,6 +121,7 @@ module RailsAdmin
     def create
       @modified_assoc = []
       @object = @abstract_model.new
+      assign_current_user_to_model
       @model_config.create.fields.each {|f| f.parse_input(@attributes) if f.respond_to?(:parse_input) }
       if @authorization_adapter
         @authorization_adapter.attributes_for(:create, @abstract_model).each do |name, value|

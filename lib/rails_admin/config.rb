@@ -79,6 +79,10 @@ module RailsAdmin
       #
       # @see RailsAdmin::Config.model
       attr_reader :registry
+      
+      # Configuration option to specify which method name will be searched for
+      # to be used as a current user refrence on model
+      attr_accessor :model_current_user
 
       # Setup authentication to be run as a before filter
       # This is run inside the controller instance so you can setup any authentication you need to
@@ -257,6 +261,7 @@ module RailsAdmin
         @default_search_operator = 'default'
         @excluded_models = []
         @included_models = []
+        @model_current_user = nil
         @label_methods = [:name, :title]
         @registry = {}
       end

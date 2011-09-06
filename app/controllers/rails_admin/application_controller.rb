@@ -26,9 +26,15 @@ module RailsAdmin
 
     def get_object
       @object = @abstract_model.get(params[:id])
+      assign_current_user_to_model
       not_found unless @object
     end
-
+    
+    def assign_current_user_to_model
+      unless @object.nil? && RailsAdmin.config.model_current_user.nil?
+        @object.send(RailsAdmin.config.model_current_user, _current_user) if (@object.respond_to?(RailsAdmin.config.model_current_user))
+      end
+    end
     private
 
     def _authenticate!
