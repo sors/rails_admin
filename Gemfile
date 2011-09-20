@@ -6,15 +6,17 @@ source 'http://rubygems.org'
 group :development, :test do
   platforms :jruby do
     gem 'jruby-openssl', '~> 0.7'
+    # activerecord-jdbc-adapter does not yet have a rails 3.1 compatible release
+    gem 'activerecord-jdbc-adapter', :git => 'https://github.com/nicksieger/activerecord-jdbc-adapter.git'
     case ENV['CI_DB_ADAPTER']
     when 'mysql'
-      gem 'activerecord-jdbcmysql-adapter', '~> 1.1'
+      gem 'activerecord-jdbcmysql-adapter', '~> 1.2'
       gem 'jdbc-mysql', '~> 5.1'
     when 'postgresql'
-      gem 'activerecord-jdbcpostgresql-adapter', '~> 1.1'
+      gem 'activerecord-jdbcpostgresql-adapter', '~> 1.2'
       gem 'jdbc-postgres', '~> 9.0'
     else
-      gem 'activerecord-jdbcsqlite3-adapter', '~> 1.1'
+      gem 'activerecord-jdbcsqlite3-adapter', '~> 1.2'
       gem 'jdbc-sqlite3', '~> 3.6'
     end
   end
@@ -31,16 +33,13 @@ group :development, :test do
   end
 
   gem 'cancan' if ENV['AUTHORIZATION_ADAPTER'] == 'cancan'
-
-  platform :rbx do
-    gem 'nokogiri', '1.4.7' # Nokogiri 1.5.0 is incompatible with Rubinius 1.2.3
-  end
+  gem 'silent-postgres'
 end
 
 group :debug do
   platform :mri_18 do
     gem 'ruby-debug'
-    gem 'linecache'
+    gem 'linecache', '<= 0.45'
   end
 
   platform :mri_19 do

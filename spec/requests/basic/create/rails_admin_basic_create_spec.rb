@@ -5,12 +5,11 @@ describe "RailsAdmin Basic Create" do
 
   describe "create" do
     before(:each) do
-      visit rails_admin_new_path(:model_name => "player")
+      visit new_path(:model_name => "player")
 
       fill_in "player[name]", :with => "Jackie Robinson"
       fill_in "player[number]", :with => "42"
       fill_in "player[position]", :with => "Second baseman"
-      check "player[suspended]"
       click_button "Save"
 
       @player = RailsAdmin::AbstractModel.new("Player").first
@@ -20,18 +19,16 @@ describe "RailsAdmin Basic Create" do
       @player.name.should eql("Jackie Robinson")
       @player.number.should eql(42)
       @player.position.should eql("Second baseman")
-      @player.should be_suspended
     end
   end
 
   describe "create and edit" do
     before(:each) do
-      visit rails_admin_new_path(:model_name => "player")
+      visit new_path(:model_name => "player")
 
       fill_in "player[name]", :with => "Jackie Robinson"
       fill_in "player[number]", :with => "42"
       fill_in "player[position]", :with => "Second baseman"
-      check "player[suspended]"
       click_button "Save and edit"
 
       @player = RailsAdmin::AbstractModel.new("Player").first
@@ -41,18 +38,16 @@ describe "RailsAdmin Basic Create" do
       @player.name.should eql("Jackie Robinson")
       @player.number.should eql(42)
       @player.position.should eql("Second baseman")
-      @player.should be_suspended
     end
   end
 
   describe "create and add another" do
     before(:each) do
-      visit rails_admin_new_path(:model_name => "player")
+      visit new_path(:model_name => "player")
 
       fill_in "player[name]", :with => "Jackie Robinson"
       fill_in "player[number]", :with => "42"
       fill_in "player[position]", :with => "Second baseman"
-      check "player[suspended]"
       click_button "Save and add another"
 
       @player = RailsAdmin::AbstractModel.new("Player").first
@@ -62,7 +57,6 @@ describe "RailsAdmin Basic Create" do
       @player.name.should eql("Jackie Robinson")
       @player.number.should eql(42)
       @player.position.should eql("Second baseman")
-      @player.should be_suspended
     end
   end
 
@@ -70,7 +64,7 @@ describe "RailsAdmin Basic Create" do
     before(:each) do
       @draft = FactoryGirl.create :draft
 
-      visit rails_admin_new_path(:model_name => "player")
+      visit new_path(:model_name => "player")
 
       fill_in "player[name]", :with => "Jackie Robinson"
       fill_in "player[number]", :with => 42
@@ -90,9 +84,9 @@ describe "RailsAdmin Basic Create" do
 
   describe "create with has-many association" do
     before(:each) do
-      @divisions = 3.times.map { FactoryGirl.create :division }
+      @divisions = 3.times.map { Division.create!(:name => "div #{Time.now.to_f}", :league => League.create!(:name => "league #{Time.now.to_f}")) }
 
-      visit rails_admin_new_path(:model_name => "league")
+      visit new_path(:model_name => "league")
 
       fill_in "league[name]", :with => "National League"
       select @divisions[0].name, :from => "league_division_ids"
@@ -117,7 +111,7 @@ describe "RailsAdmin Basic Create" do
     before(:each) do
       @teams = 3.times.map { FactoryGirl.create :team }
 
-      visit rails_admin_new_path(:model_name => "fan")
+      visit new_path(:model_name => "fan")
 
       fill_in "fan[name]", :with => "John Doe"
       select @teams[0].name, :from => "fan_team_ids"
@@ -142,7 +136,7 @@ describe "RailsAdmin Basic Create" do
       @team = FactoryGirl.create :team
       @player = FactoryGirl.create :player, :team => @team
 
-      visit rails_admin_new_path(:model_name => "player")
+      visit new_path(:model_name => "player")
 
       fill_in "player[name]", :with => @player.name
       fill_in "player[number]", :with => @player.number.to_s
@@ -158,7 +152,7 @@ describe "RailsAdmin Basic Create" do
 
   describe "create with invalid object" do
     before(:each) do
-      page.driver.post(rails_admin_create_path(:model_name => "player", :id => 1), :params => {:player => {}})
+      page.driver.post(create_path(:model_name => "player", :id => 1), :params => {:player => {}})
     end
 
     it "should show an error message" do
@@ -169,7 +163,7 @@ describe "RailsAdmin Basic Create" do
 
   describe "create with object with errors on base" do
     before(:each) do
-      visit rails_admin_new_path(:model_name => "player")
+      visit new_path(:model_name => "player")
       fill_in "player[name]", :with => "Jackie Robinson on steroids"
       click_button "Save and add another"
     end
