@@ -46,6 +46,10 @@ module RailsAdmin
           @label ||= abstract_model.model.human_attribute_name association[:name]
         end
 
+        register_instance_option(:link_to_create?) do
+          @link_to_create ||= true
+        end
+
         # Reader for a collection of association's child models in an array of
         # [label, id] arrays.
         def associated_collection(authorization_adapter)
