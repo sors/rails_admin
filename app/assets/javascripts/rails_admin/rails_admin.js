@@ -17,3 +17,4 @@
 //= require ./ra.timeline.js
 //= require ./jquery.colorpicker.js
 //= require ./application.js
+//= require ./jquery.tagsinput.js
