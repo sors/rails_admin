@@ -9,9 +9,9 @@ module RailsAdmin
     before_filter :get_object, :only => [:show, :edit, :update, :delete, :destroy]
     before_filter :get_attributes, :only => [:create, :update]
     before_filter :check_for_cancel, :only => [:create, :update, :destroy, :export, :bulk_destroy]
-    
+
     before_filter :init_user_defined_controller, :only=>  [:create,:update,:destroy,:new]
-    
+
     def init_user_defined_controller
       if (@model_config.controller_hook!=nil)
         modul = @model_config.controller_hook
@@ -26,7 +26,7 @@ module RailsAdmin
         self.extend modul 
       end
     end
-    
+
     def index
       @authorization_adapter.authorize(:index) if @authorization_adapter
       @page_name = t("admin.dashboard.pagename")
@@ -35,7 +35,7 @@ module RailsAdmin
       @month = DateTime.now.month
       @year = DateTime.now.year
       @history= AbstractHistory.history_for_month(@month, @year)
-      
+
       @abstract_models = RailsAdmin::Config.visible_models.map(&:abstract_model)
       @most_recent_changes = {}
       @count = {}
@@ -52,12 +52,12 @@ module RailsAdmin
 
     def list
 
-      
+
       @authorization_adapter.authorize(:list, @abstract_model) if @authorization_adapter
 
       @page_type = @abstract_model.pretty_name.downcase
       @page_name = t("admin.list.select", :name => @model_config.label.downcase)
-      
+
       @objects, @current_page, @page_count, @record_count = list_entries
       @schema ||= { :only => @model_config.list.visible_fields.map {|f| f.name } }
 
@@ -66,10 +66,10 @@ module RailsAdmin
         format.js { render :layout => 'rails_admin/plain.html.erb' }
         format.json do
           output = if params[:compact]
-            @objects.map{ |o| { :id => o.id, :label => o.send(@model_config.object_label_method) } }
-          else
-            @objects.to_json(@schema)
-          end
+                     @objects.map{ |o| { :id => o.id, :label => o.send(@model_config.object_label_method) } }
+                   else
+                     @objects.to_json(@schema)
+                   end
           if params[:send_data]
             send_data output, :filename => "#{params[:model_name]} #{DateTime.now.strftime("%Y-%m-%d %H:%M:%S")}.json"
           else
@@ -89,7 +89,7 @@ module RailsAdmin
           if params[:send_data]
             send_data output,
               :type => "text/csv; charset=#{encoding}; #{"header=present" if header}",
-              :disposition => "attachment; filename=#{params[:model_name]} #{DateTime.now.strftime("%Y-%m-%d %H:%M:%S")}.csv"
+            :disposition => "attachment; filename=#{params[:model_name]} #{DateTime.now.strftime("%Y-%m-%d %H:%M:%S")}.csv"
           else
             render :text => output
           end
@@ -183,7 +183,7 @@ module RailsAdmin
       @model_config.update.fields.map {|f| f.parse_input(@attributes) if f.respond_to?(:parse_input) }
 
       @object.set_attributes(@attributes, _attr_accessible_role)
-		  before_update if methods.include?(:before_update)
+      before_update if methods.include?(:before_update)
       if @object.save
         AbstractHistory.create_update_history @abstract_model, @object, @cached_assocations_hash, associations_hash, @modified_assoc, @old_object, _current_user
         after_update if methods.include?(:after_update)
@@ -325,18 +325,18 @@ module RailsAdmin
       field = @model_config.list.fields.find{ |f| f.name.to_s == params[:sort] }
 
       column = if field.nil? || field.sortable == true # use params[:sort] on the base table
-        "#{@abstract_model.model.table_name}.#{params[:sort]}"
-      elsif field.sortable == false # use default sort, asked field is not sortable
-        "#{@abstract_model.model.table_name}.#{@model_config.list.sort_by.to_s}"
-      elsif field.sortable.is_a?(String) && field.sortable.include?('.') # just provide sortable, don't do anything smart
-        field.sortable
-      elsif field.sortable.is_a?(Hash) # just join sortable hash, don't do anything smart
-        "#{field.sortable.keys.first}.#{field.sortable.values.first}"
-      elsif field.association? # use column on target table
-        "#{field.associated_model_config.abstract_model.model.table_name}.#{field.sortable}"
-      else # use described column in the field conf.
-        "#{@abstract_model.model.table_name}.#{field.sortable}"
-      end
+                 "#{@abstract_model.model.table_name}.#{params[:sort]}"
+               elsif field.sortable == false # use default sort, asked field is not sortable
+                 "#{@abstract_model.model.table_name}.#{@model_config.list.sort_by.to_s}"
+               elsif field.sortable.is_a?(String) && field.sortable.include?('.') # just provide sortable, don't do anything smart
+                 field.sortable
+               elsif field.sortable.is_a?(Hash) # just join sortable hash, don't do anything smart
+                 "#{field.sortable.keys.first}.#{field.sortable.values.first}"
+               elsif field.association? # use column on target table
+                 "#{field.associated_model_config.abstract_model.model.table_name}.#{field.sortable}"
+               else # use described column in the field conf.
+                 "#{@abstract_model.model.table_name}.#{field.sortable}"
+                 end
 
       reversed_sort = (field ? field.sort_reverse? : @model_config.list.sort_reverse?)
       {:sort => column, :sort_reverse => (params[:sort_reverse] == reversed_sort.to_s)}
@@ -415,8 +415,8 @@ module RailsAdmin
       end
 
       unless filters_statements.empty?
-       conditions[0] += " AND " unless conditions == [""]
-       conditions[0] += "#{filters_statements.join(" AND ")}" # filters should all be true
+        conditions[0] += " AND " unless conditions == [""]
+        conditions[0] += "#{filters_statements.join(" AND ")}" # filters should all be true
       end
 
       conditions += values.flatten
@@ -454,34 +454,34 @@ module RailsAdmin
       when :string, :text
         return if value.blank?
         value = case operator
-        when 'default', 'like'
-          "%#{value}%"
-        when 'starts_with'
-          "#{value}%"
-        when 'ends_with'
-          "%#{value}"
-        when 'is', '='
-          "#{value}"
-        end
+                when 'default', 'like'
+                  "%#{value}%"
+                when 'starts_with'
+                  "#{value}%"
+                when 'ends_with'
+                  "%#{value}"
+                when 'is', '='
+                  "#{value}"
+                end
         ["(#{column} #{@like_operator} ?)", value]
       when :datetime, :timestamp, :date
         return unless operator != 'default'
         values = case operator
-        when 'today'
-          [Date.today.beginning_of_day, Date.today.end_of_day]
-        when 'yesterday'
-          [Date.yesterday.beginning_of_day, Date.yesterday.end_of_day]
-        when 'this_week'
-          [Date.today.beginning_of_week.beginning_of_day, Date.today.end_of_week.end_of_day]
-        when 'last_week'
-          [1.week.ago.to_date.beginning_of_week.beginning_of_day, 1.week.ago.to_date.end_of_week.end_of_day]
-        when 'less_than'
-          return if value.blank?
-          [value.to_i.days.ago, DateTime.now]
-        when 'more_than'
-          return if value.blank?
-          [2000.years.ago, value.to_i.days.ago]
-        end
+                 when 'today'
+                   [Date.today.beginning_of_day, Date.today.end_of_day]
+                 when 'yesterday'
+                   [Date.yesterday.beginning_of_day, Date.yesterday.end_of_day]
+                 when 'this_week'
+                   [Date.today.beginning_of_week.beginning_of_day, Date.today.end_of_week.end_of_day]
+                 when 'last_week'
+                   [1.week.ago.to_date.beginning_of_week.beginning_of_day, 1.week.ago.to_date.end_of_week.end_of_day]
+                 when 'less_than'
+                   return if value.blank?
+                   [value.to_i.days.ago, DateTime.now]
+                 when 'more_than'
+                   return if value.blank?
+                   [2000.years.ago, value.to_i.days.ago]
+                 end
         ["(#{column} BETWEEN ? AND ?)", *values]
       when :enum
         return if value.blank?
